@@ -133,45 +133,61 @@ const loginUser = async function (req, res) {
 //=============================================================================get-user======================================================
 const getUser = async function (req, res) {
   try {
-    const {title } = req.query;
-    if (!title ) {
-      const getAllUsers = await usermodel.find({ isDeleted: false })
-      return res.status(200).send({ status: true, message: getAllUsers })
-  }
-
+    // const { title } = req.query;
+    // if (!title) {
+      const getAllUsers = await usermodel.find();
+      return res.status(200).send({ status: true, message: getAllUsers });
+    // }
   } catch (err) {
     res.status(500).send({ status: false, msg: err.message });
   }
 };
 
-
 //=============================================================================update-user======================================================
 
-const updateUser = async (req , res) =>{
-try{
-  const userId = req.params.userId
-  if(!isValidObjectId(userId))
-     return res.status(400).send({status : false, Msg :"Provide Valid objectId"})
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    if (!isValidObjectId(userId))
+      return res
+        .status(400)
+        .send({ status: false, Msg: "Provide Valid objectId" });
 
-  if(Object.keys(bodydata).length == 0)
-     return res.status(400).send ({status : false, Msg : "Data is required to update the user Profile"})
+    if (Object.keys(bodydata).length == 0)
+      return res
+        .status(400)
+        .send({
+          status: false,
+          Msg: "Data is required to update the user Profile",
+        });
 
-  let alert = await UserModel.findOne({_id : userId, isDeleted : true})
-  if (alert)
-  return res.status(404).send({status: False , Msg :"No User found  or Already deleted"})
+    let alert = await UserModel.findOne({ _id: userId, isDeleted: true });
+    if (alert)
+      return res
+        .status(404)
+        .send({ status: False, Msg: "No User found  or Already deleted" });
 
+    let updateUser = await UserModel.findOneAndUpdate(
+      { _id: userId },
+      {
+        title: title,
+        name: name,
+        phone: phone,
+        email: email,
+        password: password,
+      },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .send({
+        status: true,
+        Msg: "User updated Successfully",
+        data: updateUser,
+      });
+  } catch (err) {
+    return res.status(500).send({ status: false, Msg: err.message });
+  }
+};
 
-  let updateUser = await UserModel.findOneAndUpdate({_id : userId},{
-    title: title,
-    name: name,
-    phone:phone,
-    email: email,
-    password: password,
-  },{new: true})
-  return res.status(200).send({status :true, Msg : "User updated Successfully", data : updateUser})
-} catch(err){
-  return res.status(500).send({ status : false, Msg : err.message})
-}
-}
-
-module.exports = { creatUser, loginUser , getUser, updateUser };
+module.exports = { creatUser, loginUser, getUser, updateUser };
